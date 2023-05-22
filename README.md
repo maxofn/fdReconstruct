@@ -2,7 +2,7 @@
 
 This repository provides the code and data considered in the work
 
-Ofner, M., & Hörmann, S. (2023), "Reconstruction of functional data via approximate factor models of increasing rank".
+Ofner, M., & Hörmann, S. (2023), "Reconstruction of functional data via factor models of increasing rank".
 
 ## Installation
 
