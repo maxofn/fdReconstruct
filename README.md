@@ -9,7 +9,7 @@ Ofner, M., & Hörmann, S. (2023), "Covariate-informed reconstruction of partiall
 The R-package `FDFM` can be installed and loaded via the commands
 
 ```
-devtools::install_github("maxofn/FDFM")
+devtools::install_github("maxofn/FDFM/FDFM")
 library(FDFM)
 ```
 
