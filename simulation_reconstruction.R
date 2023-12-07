@@ -1,224 +1,158 @@
-# References:
-#
-# Yao, F., Müller, H. G., & Wang, J. L. (2005). Functional data analysis for sparse
-# longitudinal data. Journal of the American statistical association, 100(470), 577-590.
-#
-# Kneip, A., & Liebl, D. (2020). On the optimal reconstruction of partially observed
-# functional data. The Annals of Statistics, 48(3), 1692-1717.
-
 directory <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(directory)
 
 library(doParallel)
 library(foreach)
 library(FDFM)
+library(fdapace)
 library(ReconstPoFD)
 
 set.seed(1)
 
 # Run Simulation A ---------------------------------------------------------
 
+predres1A_exp_01   <- SimReconstruction(T =  50, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2A_exp_01   <- SimReconstruction(T = 100, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1A_exp_005  <- SimReconstruction(T =  50, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2A_exp_005  <- SimReconstruction(T = 100, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1A_poly_01  <- SimReconstruction(T =  50, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2A_poly_01  <- SimReconstruction(T = 100, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1A_poly_005 <- SimReconstruction(T =  50, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2A_poly_005 <- SimReconstruction(T = 100, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
 
-SimReconstructionA(T =  50, N = 51, type.miss = 'A', n.rep = 100)
-SimReconstructionA(T = 100, N = 51, type.miss = 'A', n.rep = 100)
-SimReconstructionA(T = 200, N = 51, type.miss = 'A', n.rep = 100)
+predres <- rbind(predres1A_exp_01, predres2A_exp_01,
+                 predres1A_exp_005, predres2A_exp_005,
+                 predres1A_poly_01, predres2A_poly_01,
+                 predres1A_poly_005, predres2A_poly_005)
+
+write.csv(predres, file = paste0(getwd(), "/Res/Reconstruction/SettingA.csv"))
 
 # Run Simulation B ---------------------------------------------------------
 
-SimReconstructionB(T =  50, N = 51, type.miss = 'B', n.rep = 100)
-SimReconstructionB(T = 100, N = 51, type.miss = 'B', n.rep = 100)
-SimReconstructionB(T = 200, N = 51, type.miss = 'B', n.rep = 100)
+predres1B_exp_01   <- SimReconstruction(T =  50, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2B_exp_01   <- SimReconstruction(T = 100, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1B_exp_005  <- SimReconstruction(T =  50, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2B_exp_005  <- SimReconstruction(T = 100, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1B_poly_01  <- SimReconstruction(T =  50, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2B_poly_01  <- SimReconstruction(T = 100, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1B_poly_005 <- SimReconstruction(T =  50, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2B_poly_005 <- SimReconstruction(T = 100, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+
+predres <- rbind(predres1B_exp_01, predres2B_exp_01,
+                 predres1B_exp_005, predres2B_exp_005,
+                 predres1B_poly_01, predres2B_poly_01,
+                 predres1B_poly_005, predres2B_poly_005)
+
+write.csv(predres, file = paste0(getwd(), "/Res/Reconstruction/SettingB.csv"))
 
 # Functions ---------------------------------------------------------------
 
-SimReconstructionA <- function(T, N, r.true = 10, r.max = 15, type.miss, n.rep = 1) {
+SimReconstruction <- function(T, type.miss, ev, eps.sd, n.rep = 1) {
   # Initialize variables
 
-  MAE <- numeric(6)
-  names(MAE) <- c("AFM", "ANo", "ANoCE", "AYes", "AYesCE", "PACE")
-  
+  MAE <- numeric(5)
+  names(MAE) <- c("Uni", "Mult", "PACE", "KL", "FLM")
+
   cluster <- makeCluster(4)
   registerDoParallel(cluster)
 
   res <- foreach(rep = 1:n.rep, .combine = 'rbind',
-                 .packages = c('FDFM', 'ReconstPoFD')) %dopar% {
-  
-    data.test <- GenObs(T = 100, N = N, r = r.true, complete = FALSE, type.miss = 'A')
-    data.train <- GenObs(T = T, N = N, r = r.true, complete = TRUE, type.miss = type.miss)
-    data <- list()
-    data$X <- rbind(data.train$X, data.test$X)
-    data$Y <- rbind(data.train$Y, data.test$Y)
-    data$Y.obs <- rbind(data.train$Y.obs, data.test$Y.obs)
+                 .packages = c('FDFM', 'fdapace', 'ReconstPoFD')) %dopar% {
+
+    data_test <-  GenObs(T = 50, type.miss = type.miss, ev = ev,
+                         eps.sd = eps.sd, complete = FALSE)
+    data_train <- GenObs(T = T, type.miss = type.miss, ev = ev,
+                         eps.sd = eps.sd, complete = TRUE)
     
-    incompletely.obs <- which(rowSums(is.na(data$Y.obs)) > 0)
+    Y0.obs <- rbind(data_test$Y0.obs, data_train$Y0.obs)
+    Y1.obs <- rbind(data_test$Y1.obs, data_train$Y1.obs)
     
-    # Reconstruction via AFM --------------------------------------------------
-    reconst <- ReconstFD(data$Y.obs, T.set = incompletely.obs, method = "Kraus", r.max = r.max)
-    r.hat <- reconst$r
-    
-    MAE["AFM"] <- mean(apply(abs(reconst$X.hat - data$X[incompletely.obs,]),1, max))
-    
+    Y.obs <- cbind(Y0.obs, Y1.obs)
+    incompletely.obs <- which(rowSums(is.na(Y.obs)) > 0)
+    completely.obs <- which(rowSums(is.na(Y.obs)) == 0)
+    Tc <- length(completely.obs)
+    Tm <- length(incompletely.obs)
+
+    # Reconstruction using univariate factor model ----------------------------
+    reconst_uni  <- ReconstFD(Y0.obs, T.set = incompletely.obs)
+
+    MAE["Uni"]  <- mean(apply(abs(reconst_uni$X.hat[incompletely.obs,] -
+                                    data_test$X0[incompletely.obs,]),1, max))
+
+    # Reconstruction using multivariate factor model --------------------------
+
+    reconst_mult <- ReconstFD(Y0.obs, Y1.obs, T.set = incompletely.obs)
+
+    MAE["Mult"] <- mean(apply(abs(reconst_mult$X.hat[incompletely.obs,] -
+                                    data_test$X0[incompletely.obs,]),1, max))
+
+    # Reconstruction following Yao, Müller & Wang (2005a) ---------------------
+    n0 <- dim(Y0.obs)[2]
+    grid <- seq(0, 1, length.out = n0)
+    Lu <- vector(mode = "list", length = T + 50)
+    Ly <- vector(mode = "list", length = T + 50)
+    for(t in 1:(T + 50)) {
+      O.t <- which(!is.na(Y0.obs[t,]))
+      Lu[[t]] <- grid[O.t]
+      Ly[[t]] <- Y0.obs[t,O.t]
+    }
+
+    reconst_PACE <- ReconstPoFD::reconstructKneipLiebl(Ly, Lu,
+                                          method = 'PACE',
+                                          nRegGrid = n0)
+    X.hat.PACE <- t(matrix(unlist(reconst_PACE[['Y_reconst_list']]),
+                           ncol = T + 50))[incompletely.obs,]
+
+    MAE["PACE"] <- mean(apply(abs(X.hat.PACE -
+                                    data_test$X0[incompletely.obs,]),1, max))
+
+
     # Reconstruction following Kneip & Liebl ----------------------------------
-    grid <- seq(0, 1, length.out = N)
-    Lu <- vector(mode = "list", length = T + 100)
-    Ly <- vector(mode = "list", length = T + 100)
-    for(t in 1:(T + 100)) {
-     O.t <- which(!is.na(data$Y.obs[t,]))
-     Lu[[t]] <- grid[O.t]
-     Ly[[t]] <- data$Y.obs[t,O.t]
+    reconst_KL <- reconstructKneipLiebl(Ly, Lu,
+                                        method = 'Error>0_AlignYES_CEscores',
+                                        nRegGrid = n0)
+    X.hat.KL <- t(matrix(unlist(reconst_KL[['Y_reconst_list']]),
+                         ncol = T + 50))[incompletely.obs,]
+
+    MAE["KL"] <- mean(apply(abs(X.hat.KL - data_test$X0[incompletely.obs,]),1, max))
+
+    # Reconstruction following Yao, Müller & Wang (2005b) ---------------------
+    Lt <- list()
+    Ly <- list()
+    Lx <- list()
+
+    for(t in 1:Tc) {
+      Lt[[t]] <- grid
+      Lx[[t]] <- Y1.obs[completely.obs[t],]
+      Ly[[t]] <- Y0.obs[completely.obs[t],]
     }
-    
-    r.unique <- unique(r.hat)
-    
-    # ANo ---------------------------------------------------------------------
-    X.hat <- matrix(NA, nrow = 100, ncol = N)
-    
-    for(r in r.unique) {
-     idx <- which(r.hat == r)
-     reconst <- reconstructKneipLiebl(Ly, Lu,
-                                      method = 'Error>=0_AlignNO',
-                                      K = r,
-                                      nRegGrid = N)
-     X.hat[idx,] <- t(matrix(unlist(reconst[['Y_reconst_list']]), ncol = T + 100))[idx + T,]
+    X <- list(X = list(Ly = Lx, Lt = Lt))
+    Y <- list(Ly = Ly, Lt = Lt)
+
+    Lt <- list()
+    Lx.test <- list()
+    for(t in 1:Tm) {
+      Lt[[t]] <- grid
+      Lx.test[[t]] <- Y1.obs[incompletely.obs[t],]
     }
-    
-    MAE["ANo"] <- mean(apply(abs(X.hat - data$X[incompletely.obs,]),1, max))
-    
-    # ANoCE -------------------------------------------------------------------
-    X.hat <- matrix(NA, nrow = 100, ncol = N)
-    
-    for(r in r.unique) {
-     idx <- which(r.hat == r)
-     reconst <- reconstructKneipLiebl(Ly, Lu,
-                                      method = 'Error>0_AlignNO_CEscores',
-                                      K = r,
-                                      nRegGrid = N)
-     X.hat[idx,] <- t(matrix(unlist(reconst[['Y_reconst_list']]), ncol = T + 100))[idx + T,]
-    }
-    
-    MAE["ANoCE"] <- mean(apply(abs(X.hat - data$X[incompletely.obs,]),1, max))
-    
-    # AYes --------------------------------------------------------------------
-    X.hat <- matrix(NA, nrow = 100, ncol = N)
-    
-    for(r in r.unique) {
-     idx <- which(r.hat == r)
-     reconst <- reconstructKneipLiebl(Ly, Lu,
-                                      method = 'Error>0_AlignYES',
-                                      K = r,
-                                      nRegGrid = N)
-     X.hat[idx,] <- t(matrix(unlist(reconst[['Y_reconst_list']]), ncol = T + 100))[idx + T,]
-    }
-    
-    MAE["AYes"] <- mean(apply(abs(X.hat - data$X[incompletely.obs,]),1, max))
-    
-    # AYesCE ------------------------------------------------------------------
-    X.hat <- matrix(NA, nrow = 100, ncol = N)
-    
-    for(r in r.unique) {
-     idx <- which(r.hat == r)
-     reconst <- reconstructKneipLiebl(Ly, Lu,
-                                      method = 'Error>0_AlignYES_CEscores',
-                                      K = r,
-                                      nRegGrid = N)
-     X.hat[idx,] <- t(matrix(unlist(reconst[['Y_reconst_list']]), ncol = T + 100))[idx + T,]
-    }
-    
-    MAE["AYesCE"] <- mean(apply(abs(X.hat - data$X[incompletely.obs,]),1, max))
-    
-    # Reconstruction following Yao, Mueller, and Wang -------------------------
-    X.hat <- matrix(NA, nrow = 100, ncol = N)
-    for(r in r.unique) {
-     idx <- which(r.hat == r)
-     reconst <- reconstructKneipLiebl(Ly, Lu,
-                                      method = 'PACE',
-                                      K = r,
-                                      nRegGrid = N)
-     X.hat[idx,] <- t(matrix(unlist(reconst[['Y_reconst_list']]), ncol = T + 100))[idx + T,]
-    }
-    MAE["PACE"] <- mean(apply(abs(X.hat - data$X[incompletely.obs,]),1, max))
+    X.test <- list(X = list(Ly = Lx.test, Lt = Lt))
+
+    reconst_FLM <- FLM1(Y, X, X.test)
+    X.hat.FLM <- matrix(unlist(reconst_FLM[['yPred']]), nrow = Tm)
+
+    MAE["FLM"] <- mean(apply(abs(X.hat.FLM - data_test$X0[incompletely.obs,]),1, max))
     MAE
   }
-  
-  stopCluster(cluster)
-  
-  filename <- paste0("T_", T, "_", type.miss)
-  
-  MAE <- apply(res, 2, mean)
-  SD <- apply(res, 2, sd) * sqrt(99/100)
-  
-  simres <- rbind(MAE, SD)
-  colnames(simres) <- names(MAE)
-  rownames(simres) <- c("MAE", "SD")
-  
-  write.csv(round(simres, 4), file = paste0(getwd(), "/Res/Reconstruction/", filename, ".csv"))
-  return()
-}
 
-SimReconstructionB <- function(T, N, r.true = 10, r.max = 15, type.miss, n.rep = 1) {
-  # Initialize variables
-  
-  MAE <- numeric(2)
-  names(MAE) <- c("AFM", "PACE")
-  
-  cluster <- makeCluster(4)
-  registerDoParallel(cluster)
-  
-  res <- foreach(rep = 1:n.rep, .combine = 'rbind',
-                 .packages = c('FDFM', 'ReconstPoFD')) %dopar% {
-                   
-                   data.test <- GenObs(T = 100, N = N, r = r.true, complete = FALSE, type.miss = 'B')
-                   data.train <- GenObs(T = T, N = N, r = r.true, complete = TRUE, type.miss = type.miss)
-                   data <- list()
-                   data$X <- rbind(data.train$X, data.test$X)
-                   data$Y <- rbind(data.train$Y, data.test$Y)
-                   data$Y.obs <- rbind(data.train$Y.obs, data.test$Y.obs)
-                   
-                   incompletely.obs <- which(rowSums(is.na(data$Y.obs)) > 0)
-                   
-                   # Reconstruction via AFM --------------------------------------------------
-                   reconst <- ReconstFD(data$Y.obs, T.set = incompletely.obs, method = "Kraus", r.max = r.max)
-                   r.hat <- reconst$r
-                   
-                   MAE["AFM"] <- mean(apply(abs(reconst$X.hat - data$X[incompletely.obs,]),1, max))
-                   
-                   # Reconstruction following Kneip & Liebl ----------------------------------
-                   grid <- seq(0, 1, length.out = N)
-                   Lu <- vector(mode = "list", length = T + 100)
-                   Ly <- vector(mode = "list", length = T + 100)
-                   for(t in 1:(T + 100)) {
-                     O.t <- which(!is.na(data$Y.obs[t,]))
-                     Lu[[t]] <- grid[O.t]
-                     Ly[[t]] <- data$Y.obs[t,O.t]
-                   }
-                   
-                   r.unique <- unique(r.hat)
-                   
-                   # Reconstruction following Yao, Mueller, and Wang -------------------------
-                   X.hat <- matrix(NA, nrow = 100, ncol = N)
-                   for(r in r.unique) {
-                     idx <- which(r.hat == r)
-                     reconst <- reconstructKneipLiebl(Ly, Lu,
-                                                      method = 'PACE',
-                                                      K = r,
-                                                      nRegGrid = N)
-                     X.hat[idx,] <- t(matrix(unlist(reconst[['Y_reconst_list']]), ncol = T + 100))[idx + T,]
-                   }
-                   MAE["PACE"] <- mean(apply(abs(X.hat - data$X[incompletely.obs,]),1, max))
-                   MAE
-                 }
-  
   stopCluster(cluster)
-  
-  filename <- paste0("T_", T, "_", type.miss)
-  
+
   MAE <- apply(res, 2, mean)
-  SD <- apply(res, 2, sd) * sqrt(99/100)
+  SD <- apply(res, 2, sd) * sqrt((n.rep - 1)/n.rep)
+
+  simres <- data.frame(matrix(c(rbind(round(MAE, 2), round(SD, 2))), nrow = 1))
+  colnames(simres)[2 * 1:5 - 1] <- names(MAE)
+  colnames(simres)[2 * 1:5] <- rep("SD", 5)
+  rownames(simres) <- c(paste(type.miss, ev, eps.sd, T))
   
-  simres <- rbind(MAE, SD)
-  colnames(simres) <- names(MAE)
-  rownames(simres) <- c("MAE", "SD")
-  
-  write.csv(round(simres, 4), file = paste0(getwd(), "/Res/Reconstruction/", filename, ".csv"))
-  return()
+  return(simres)
 }

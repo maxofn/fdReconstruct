@@ -5,51 +5,106 @@ library(doParallel)
 library(FDFM)
 library(foreach)
 
-# Run simulation for alpha = 0.25 -----------------------------------------
 set.seed(1)
-alpha0 = 0.25
-predres1A <- SimPredint(T =  50, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
-predres2A <- SimPredint(T = 100, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
-predres3A <- SimPredint(T = 200, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
 
-predres1B <- SimPredint(T =  50, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
-predres2B <- SimPredint(T = 100, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
-predres3B <- SimPredint(T = 200, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
+# Run simulation for alpha = 0.05  -----------------------------------------
 
-predres <- rbind(predres1A, predres2A, predres3A, predres1B, predres2B, predres3B)
-write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_075.csv"))
+alpha = 0.05
 
-# Run simulation for alpha = 0.10 -----------------------------------------
-set.seed(1)
-alpha0 = 0.10
-predres1A <- SimPredint(T =  50, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
-predres2A <- SimPredint(T = 100, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
-predres3A <- SimPredint(T = 200, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
+predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2A_exp_01   <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1A_exp_005  <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2A_exp_005  <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1A_poly_01  <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2A_poly_01  <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1A_poly_005 <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2A_poly_005 <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
 
-predres1B <- SimPredint(T =  50, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
-predres2B <- SimPredint(T = 100, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
-predres3B <- SimPredint(T = 200, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
+predres1B_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2B_exp_01   <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1B_exp_005  <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2B_exp_005  <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1B_poly_01  <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2B_poly_01  <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1B_poly_005 <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2B_poly_005 <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
 
-predres <- rbind(predres1A, predres2A, predres3A, predres1B, predres2B, predres3B)
+predres <- rbind(predres1A_exp_01, predres2A_exp_01,
+                 predres1A_exp_005, predres2A_exp_005,
+                 predres1A_poly_01, predres2A_poly_01,
+                 predres1A_poly_005, predres2A_poly_005,
+                 predres1B_exp_01, predres2B_exp_01,
+                 predres1B_exp_005, predres2B_exp_005,
+                 predres1B_poly_01, predres2B_poly_01,
+                 predres1B_poly_005, predres2B_poly_005)
+
+write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_095.csv"))
+
+alpha = 0.10
+
+predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2A_exp_01   <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1A_exp_005  <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2A_exp_005  <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1A_poly_01  <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2A_poly_01  <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1A_poly_005 <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2A_poly_005 <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+
+predres1B_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2B_exp_01   <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1B_exp_005  <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2B_exp_005  <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1B_poly_01  <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2B_poly_01  <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1B_poly_005 <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2B_poly_005 <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+
+predres <- rbind(predres1A_exp_01, predres2A_exp_01,
+                 predres1A_exp_005, predres2A_exp_005,
+                 predres1A_poly_01, predres2A_poly_01,
+                 predres1A_poly_005, predres2A_poly_005,
+                 predres1B_exp_01, predres2B_exp_01,
+                 predres1B_exp_005, predres2B_exp_005,
+                 predres1B_poly_01, predres2B_poly_01,
+                 predres1B_poly_005, predres2B_poly_005)
+
 write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_090.csv"))
 
-# Run simulation for alpha = 0.05 -----------------------------------------
-set.seed(1)
-alpha0 = 0.05
-predres1A <- SimPredint(T =  50, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
-predres2A <- SimPredint(T = 100, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
-predres3A <- SimPredint(T = 200, N = 51, alpha = alpha0, type.miss = 'A', n.rep = 100)
+alpha = 0.25
 
-predres1B <- SimPredint(T =  50, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
-predres2B <- SimPredint(T = 100, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
-predres3B <- SimPredint(T = 200, N = 51, alpha = alpha0, type.miss = 'B', n.rep = 100)
+predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2A_exp_01   <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1A_exp_005  <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2A_exp_005  <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1A_poly_01  <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2A_poly_01  <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1A_poly_005 <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2A_poly_005 <- SimPredint(T = 100, alpha = alpha, type.miss = 'A', ev =  "poly", eps.sd =  0.05, n.rep = 100)
 
-predres <- rbind(predres1A, predres2A, predres3A, predres1B, predres2B, predres3B)
-write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_095.csv"))
+predres1B_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres2B_exp_01   <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =   0.1, n.rep = 100)
+predres1B_exp_005  <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres2B_exp_005  <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =   "exp", eps.sd =  0.05, n.rep = 100)
+predres1B_poly_01  <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres2B_poly_01  <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =   0.1, n.rep = 100)
+predres1B_poly_005 <- SimPredint(T =  50, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+predres2B_poly_005 <- SimPredint(T = 100, alpha = alpha, type.miss = 'B', ev =  "poly", eps.sd =  0.05, n.rep = 100)
+
+predres <- rbind(predres1A_exp_01, predres2A_exp_01,
+                 predres1A_exp_005, predres2A_exp_005,
+                 predres1A_poly_01, predres2A_poly_01,
+                 predres1A_poly_005, predres2A_poly_005,
+                 predres1B_exp_01, predres2B_exp_01,
+                 predres1B_exp_005, predres2B_exp_005,
+                 predres1B_poly_01, predres2B_poly_01,
+                 predres1B_poly_005, predres2B_poly_005)
+
+write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_075.csv"))
 
 # Functions ---------------------------------------------------------------
 
-SimPredint <- function(T, N, alpha, r.true = 10, r.max = 15, type.miss, n.rep = 1) {
+SimPredint <- function(T, alpha, type.miss, ev, eps.sd, n.rep = 1) {
   # Perform Simulation
 
   cluster <- makeCluster(4)
@@ -57,39 +112,38 @@ SimPredint <- function(T, N, alpha, r.true = 10, r.max = 15, type.miss, n.rep = 
 
   res <- foreach(rep = 1:n.rep, .combine = 'cbind', .packages = 'FDFM') %dopar% {
 
-    data.test <- GenObs(T = 100, N = N, r = r.true, complete = FALSE, type.miss = type.miss)
-    data.train <- GenObs(T = T, N = N, r = r.true, complete = TRUE, type.miss = type.miss)
-    data <- list()
-    data$X <- rbind(data.train$X, data.test$X)
-    data$Y <- rbind(data.train$Y, data.test$Y)
-    data$Y.obs <- rbind(data.train$Y.obs, data.test$Y.obs)
+    # Generate test data
+    data_test <-  GenObs(T = 100, type.miss = type.miss, ev = ev,
+                         eps.sd = eps.sd, complete = FALSE)
+    data_train <- GenObs(T = T, type.miss = type.miss, ev = ev,
+                         eps.sd = eps.sd, complete = TRUE)
 
-    incompletely.obs <- which(rowSums(is.na(data$Y.obs)) > 0)
+    Y0.obs <- rbind(data_test$Y0.obs, data_train$Y0.obs)
+    Y1.obs <- rbind(data_test$Y1.obs, data_train$Y1.obs)
+
+    incompletely.obs <- which(rowSums(is.na(Y0.obs)) > 0)
 
     # Reconstruction via factor models
-    reconst <- ReconstFD(data$Y.obs, T.set = incompletely.obs,
-                         method = "Kraus",
-                         pred.band = TRUE,
-                         p = 1 - alpha,
-                         r.max = r.max)
+    reconst <- ReconstFD(Y0.obs, Y1.obs, T.set = incompletely.obs,
+                         pred.band = TRUE, p = 1 - alpha)
 
     coverage <- 0
-    for(t in 1:100) {
-      O.t <- which(!is.na(data$Y.obs[T + t,]))
-      if((max(data$X[T + t,-O.t] - reconst$U.hat[t,-O.t]) <= 0) &
-         (max(data$X[T + t,-O.t] - reconst$L.hat[t,-O.t]) >= 0)) {
+    for(t in 1:length(incompletely.obs)) {
+      O.t <- which(!is.na(Y0.obs[incompletely.obs[t],]))
+      if((max(data_test$X0[incompletely.obs[t],-O.t] - reconst$U.hat[t,-O.t]) <= 0) &
+         (min(data_test$X0[incompletely.obs[t],-O.t] - reconst$L.hat[t,-O.t]) >= 0)) {
         coverage <- coverage + 1
       }
     }
-    coverage/100
+    coverage/length(incompletely.obs)
   }
 
   stopCluster(cluster)
-  
-  simres <- round(data.frame(MEAN = mean(res), SD = sd(res) * sqrt(99/100)), 4)
+
+  simres <- round(data.frame(MEAN = mean(res), SD = sd(res) * sqrt((n.rep - 1)/n.rep)), 4)
   colnames(simres) <- c("MEAN", "SD")
-  rownames(simres) <- c(paste0(type.miss, T))
-  
+  rownames(simres) <- c(paste(type.miss, ev, eps.sd, T))
+
   return(simres)
 }
 

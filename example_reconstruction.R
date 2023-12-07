@@ -1,6 +1,8 @@
 directory <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(directory)
 library(FDFM)
+library(fdapace)
+library(ReconstPoFD)
 require(RColorBrewer)
 require(ggplot2)
 require(ggpubr)
@@ -8,85 +10,84 @@ require(latex2exp)
 require(reshape2)
 
 BLUE <- brewer.pal(3, name="Paired")[2]
+
+# Exponentially decaying eigenvalues --------------------------------------
 set.seed(1)
 
-N = 51
-grid <- seq(0, 1, length.out = N)
-r = 10
+T <- 100
+data_test  <- GenObs(T = 1, n = 51, r = 50, type.miss = "A", ev = "exp",
+                     eps.sd = 0.05, complete = FALSE)
+data_train <- GenObs(T = T, n = 51, r = 50, type.miss = "A", ev = "exp",
+                     eps.sd = 0.05, complete = TRUE)
 
-data.test <- GenObs(T = 1, N = N, r = r, complete = FALSE, type.miss = 'B')
+Y0.obs <- rbind(data_test$Y0.obs, data_train$Y0.obs)
+Y1.obs <- rbind(data_test$Y1.obs, data_train$Y1.obs)
 
-data   <- GenObs(T = 200, N = N, r = r, complete = TRUE , type.miss = 'B')
-data$X <- rbind(data$X, data.test$X)
-data$Y <- rbind(data$Y, data.test$Y)
-data$Y.obs <- rbind(data$Y.obs, data.test$Y.obs)
+reconst_mult <- ReconstFD(Y0.obs, Y1.obs, T.set = c(1),
+                          pred.band = TRUE)
 
-reconst <- ReconstFD(data$Y.obs, T.set = c(201), method = "rGiven", r = c(7),
-                     pred.band = TRUE, p = 0.95, r.max = 15)
-reconst$r
+grid <- seq(0, 1, length.out = 51)
+x.hat.df <- data.frame(Var1 = grid, value = as.vector(reconst_mult$X.hat))
+x.df <- data.frame(Var1 = grid, value = data_test$X0[1,])
+y.df <- data.frame(Var1 = grid, value = Y0.obs[1,])
+pred.df <- data.frame(Var1 = grid, u.df = as.vector(reconst_mult$U.hat),
+                      l.df = as.vector(reconst_mult$L.hat))
 
-x.hat.df <- data.frame(Var1 = grid, value = as.vector(reconst$X.hat))
-x.df <- data.frame(Var1 = grid, value = data$X[201,])
-y.df <- data.frame(Var1 = grid, value = data$Y.obs[201,])
-pred.df <- data.frame(Var1 = grid, u.df = as.vector(reconst$U.hat),
-                      l.df = as.vector(reconst$L.hat))
-
-plot.example <- ggplot2::ggplot() +
+plot.exp <- ggplot2::ggplot() +
   geom_ribbon(data = pred.df, aes(x = Var1, ymin = l.df, ymax = u.df),
               fill = "gray70", alpha = 0.3) +
   geom_point(data = y.df, aes(x = Var1, y = value),
-             size = 5, alpha = 0.5, col = BLUE) +
+             size = 3, alpha = 0.5, col = BLUE) +
   geom_line(data = x.df, aes(x = Var1, y = value),
-            linewidth = 1.5, linetype = 3) +
+            linewidth = 0.5, linetype = 3) +
   geom_line(data = x.hat.df, aes(x = Var1, y = value),
-            linewidth = 1.5, col = BLUE) +
+            linewidth = 1, col = BLUE) +
   xlab("") +
   ylab("") +
-  theme_minimal(base_size = 24) +
-  theme(legend.position="bottom") +
-  ggtitle("DGPB")
-plot.example
+  theme_minimal(base_size = 11) +
+  theme(legend.position="bottom")
+plot.exp
 
-pdf(paste0(getwd(), "/Res/Bands/", "ExampleB.pdf"), height = 6,
-    width = 8.5)
-plot.example
-dev.off()
+# Polynomially decaying eigenvalues --------------------------------------
+set.seed(1)
 
-data.test <- GenObs(T = 1, N = N, r = r, complete = FALSE, type.miss = 'A')
+T <- 100
+data_test  <- GenObs(T = 1, n = 51, r = 50, type.miss = "A", ev = "poly",
+                     eps.sd = 0.05, complete = FALSE)
+data_train <- GenObs(T = T, n = 51, r = 50, type.miss = "A", ev = "poly",
+                     eps.sd = 0.05, complete = TRUE)
 
-data   <- GenObs(T = 200, N = N, r = r, complete = TRUE , type.miss = 'A')
-data$X <- rbind(data$X, data.test$X)
-data$Y <- rbind(data$Y, data.test$Y)
-data$Y.obs <- rbind(data$Y.obs, data.test$Y.obs)
 
-reconst <- ReconstFD(data$Y.obs, T.set = c(201), method = "rGiven", r = c(7),
-                     pred.band = TRUE, p = 0.95, r.max = 15)
-reconst$r
+Y0.obs <- rbind(data_test$Y0.obs, data_train$Y0.obs)
+Y1.obs <- rbind(data_test$Y1.obs, data_train$Y1.obs)
 
-x.hat.df <- data.frame(Var1 = grid, value = as.vector(reconst$X.hat))
-x.df <- data.frame(Var1 = grid, value = data$X[201,])
-y.df <- data.frame(Var1 = grid, value = data$Y.obs[201,])
-pred.df <- data.frame(Var1 = grid, u.df = as.vector(reconst$U.hat),
-                      l.df = as.vector(reconst$L.hat))
+reconst_mult <- ReconstFD(Y0.obs, Y1.obs, T.set = c(1),
+                          pred.band = TRUE)
 
-plot.example <- ggplot2::ggplot() +
+grid <- seq(0, 1, length.out = 51)
+x.hat.df <- data.frame(Var1 = grid, value = as.vector(reconst_mult$X.hat))
+x.df <- data.frame(Var1 = grid, value = data_test$X0[1,])
+y.df <- data.frame(Var1 = grid, value = Y0.obs[1,])
+pred.df <- data.frame(Var1 = grid, u.df = as.vector(reconst_mult$U.hat),
+                      l.df = as.vector(reconst_mult$L.hat))
+
+plot.poly <- ggplot2::ggplot() +
   geom_ribbon(data = pred.df, aes(x = Var1, ymin = l.df, ymax = u.df),
               fill = "gray70", alpha = 0.3) +
   geom_point(data = y.df, aes(x = Var1, y = value),
-             size = 5, alpha = 0.5, col = BLUE) +
+             size = 3, alpha = 0.5, col = BLUE) +
   geom_line(data = x.df, aes(x = Var1, y = value),
-            linewidth = 1.5, linetype = 3) +
+            linewidth = 0.5, linetype = 3) +
   geom_line(data = x.hat.df, aes(x = Var1, y = value),
-            linewidth = 1.5, col = BLUE) +
+            linewidth = 1, col = BLUE) +
   xlab("") +
   ylab("") +
-  theme_minimal(base_size = 24) +
-  theme(legend.position="bottom") +
-  ggtitle("DGPA")
-plot.example
+  theme_minimal(base_size = 11) +
+  theme(legend.position="bottom")
+plot.poly
 
-pdf(paste0(getwd(), "/Res/Bands/", "ExampleA.pdf"), height = 6,
-    width = 8.5)
-plot.example
+pdf(paste0(getwd(), "/Res/Reconstruction/", "simulation_examples.pdf"), height = 3,
+    width = 8.27)
+do.call("ggarrange", c(list(plot.exp, plot.poly), nrow = 1, ncol = 2))
 dev.off()
 
