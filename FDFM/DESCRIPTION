@@ -1,0 +1,13 @@
+Package: FDFM
+Type: Package
+Title: Reconstruct functional data via approximate factor models
+Version: 0.1.0
+Authors@R: person("Maximilian", "Ofner", email = "m.ofner@tugraz.at", 
+  role = c("aut", "cre"))
+Description: Companions the work 'Reconstruction of functional data via approximate factor models with increasing rank'.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 2.10)
