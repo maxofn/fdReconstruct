@@ -1,6 +1,6 @@
 directory <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(directory)
-library(FDFM)
+library(fdReconstruct)
 require(RColorBrewer)
 require(ggplot2)
 require(ggpubr)
@@ -22,7 +22,7 @@ Y1.obs <- matrix(data$temp_west, nrow = T, ncol = N, byrow = TRUE)
 is.complete   <- which(rowSums(is.na(Y0.obs))==0)
 is.incomplete <- which(rowSums(is.na(Y0.obs))>0)
 length(is.complete) # 66
-length(is.incomplete) # 76
+length(is.incomplete) # 10
 
 # Mean temperatures
 mean(Y0.obs, na.rm = TRUE) # 21.6
@@ -54,7 +54,7 @@ Y.comp.df$Var1 <- rep(time, length(is.complete))
 
 plot.sample0 <- ggplot2::ggplot() +
   geom_line(data = Y.comp.df, aes(x = Var1, y = value, group = Var2),
-            col = "gray80", linewidth = 0.3) +
+            col = "gray70", linewidth = 0.3) +
   geom_line(data = Y.miss.df, aes(x = Var1, y = value, group = Var2,
                                   col = as.factor(Var2)), linewidth = 1) +
   scale_color_manual(values = colours) +
@@ -74,7 +74,7 @@ Y.comp.df$Var1 <- rep(time, T)
 
 plot.sample1 <- ggplot2::ggplot() +
   geom_line(data = Y.comp.df, aes(x = Var1, y = value, group = Var2),
-            col = "gray80", linewidth = 0.3) +
+            col = "gray70", linewidth = 0.3) +
   scale_x_datetime(date_breaks = "360 min",
                    date_labels = c("00:00", "06:00", "12:00", "18:00", "24:00")) +
   xlab("time") +
@@ -84,7 +84,7 @@ plot.sample1 <- ggplot2::ggplot() +
   ggtitle("West")
 plot.sample1
 
-pdf(paste0(getwd(), "/Res/Real data/", "sample.pdf"), height = 3,
+pdf(paste0(getwd(), "/Results/Real data/", "sample.pdf"), height = 3,
     width = 8.27)
 do.call("ggarrange", c(list(plot.sample0, plot.sample1), nrow = 1, ncol = 2))
 dev.off()
@@ -92,12 +92,12 @@ dev.off()
 
 # Reconstruct data --------------------------------------------------------
 
-reconst_mult <- ReconstFD(Y0.obs = Y0.obs, Y1.obs = Y1.obs, T.set = is.incomplete,
-                           pred.band = TRUE, p = 0.95, r.max = 30, w = c(10,1))
-reconst_uni  <- ReconstFD(Y0.obs = Y0.obs, T.set = is.incomplete,
-                             pred.band = TRUE, p = 0.95, r.max = 15)
+reconst_mult <- fdReconstruct(Y0.obs = Y0.obs, Y1.obs = Y1.obs, T.set = is.incomplete,
+                              pred.band = TRUE, p = 0.95, r.max = 30)
+reconst_uni  <- fdReconstruct(Y0.obs = Y0.obs, T.set = is.incomplete,
+                              pred.band = TRUE, p = 0.95, r.max = 30)
 
-reconst_mult$r # [1] 17 13 18 16 17 11 18 12 18 15
+reconst_mult$r # [1] 18  8 18 18 15 24 19 25 18 16
 
 # Plot reconstruction of partially observed curves ------------------------
 
@@ -139,12 +139,12 @@ for(t.idx in 1:10) {
   t.count <- t.count + 1
 }
 
-pdf(paste0(getwd(), "/Res/Real data/", "weather_reconstructions.pdf"),
+pdf(paste0(getwd(), "/Results/Real data/", "weather_reconstructions.pdf"),
     height = 11.69, width = 8.27)
 do.call("ggarrange", c(list, nrow = 5, ncol = 2))
 dev.off()
 
-pdf(paste0(getwd(), "/Res/Real data/", "weather_examples.pdf"), height = 3,
+pdf(paste0(getwd(), "/Results/Real data/", "weather_examples.pdf"), height = 3,
     width = 8.27)
-do.call("ggarrange", c(list(list[[6]], list[[8]]), nrow = 1, ncol = 2))
+do.call("ggarrange", c(list(list[[5]], list[[6]]), nrow = 1, ncol = 2))
 dev.off()

@@ -3,7 +3,7 @@ setwd(directory)
 
 library(doParallel)
 library(foreach)
-library(FDFM)
+library(fdReconstruct)
 library(fdapace)
 library(ReconstPoFD)
 
@@ -25,7 +25,7 @@ predres <- rbind(predres1A_exp_01, predres2A_exp_01,
                  predres1A_poly_01, predres2A_poly_01,
                  predres1A_poly_005, predres2A_poly_005)
 
-write.csv(predres, file = paste0(getwd(), "/Res/Reconstruction/SettingA.csv"))
+write.csv(predres, file = paste0(getwd(), "/Results/Reconstruction/SettingA.csv"))
 
 # Run Simulation B ---------------------------------------------------------
 
@@ -43,7 +43,7 @@ predres <- rbind(predres1B_exp_01, predres2B_exp_01,
                  predres1B_poly_01, predres2B_poly_01,
                  predres1B_poly_005, predres2B_poly_005)
 
-write.csv(predres, file = paste0(getwd(), "/Res/Reconstruction/SettingB.csv"))
+write.csv(predres, file = paste0(getwd(), "/Results/Reconstruction/SettingB.csv"))
 
 # Functions ---------------------------------------------------------------
 
@@ -57,7 +57,7 @@ SimReconstruction <- function(T, type.miss, ev, eps.sd, n.rep = 1) {
   registerDoParallel(cluster)
 
   res <- foreach(rep = 1:n.rep, .combine = 'rbind',
-                 .packages = c('FDFM', 'fdapace', 'ReconstPoFD')) %dopar% {
+                 .packages = c('fdReconstruct', 'fdapace', 'ReconstPoFD')) %dopar% {
 
     data_test <-  GenObs(T = 50, type.miss = type.miss, ev = ev,
                          eps.sd = eps.sd, complete = FALSE)
@@ -74,21 +74,21 @@ SimReconstruction <- function(T, type.miss, ev, eps.sd, n.rep = 1) {
     Tm <- length(incompletely.obs)
 
     # Reconstruction using univariate factor model ----------------------------
-    reconst_uni  <- ReconstFD(Y0.obs, T.set = incompletely.obs)
+    reconst_uni  <- fdReconstruct(Y0.obs, T.set = incompletely.obs)
 
     MAE["Uni"]  <- mean(apply(abs(reconst_uni$X.hat[incompletely.obs,] -
                                     data_test$X0[incompletely.obs,]),1, max))
 
     # Reconstruction using multivariate factor model --------------------------
 
-    reconst_mult <- ReconstFD(Y0.obs, Y1.obs, T.set = incompletely.obs)
+    reconst_mult <- fdReconstruct(Y0.obs, Y1.obs, T.set = incompletely.obs)
 
     MAE["Mult"] <- mean(apply(abs(reconst_mult$X.hat[incompletely.obs,] -
                                     data_test$X0[incompletely.obs,]),1, max))
 
     # Reconstruction following Yao, Müller & Wang (2005a) ---------------------
-    n0 <- dim(Y0.obs)[2]
-    grid <- seq(0, 1, length.out = n0)
+    N <- dim(Y0.obs)[2]
+    grid <- seq(0, 1, length.out = N)
     Lu <- vector(mode = "list", length = T + 50)
     Ly <- vector(mode = "list", length = T + 50)
     for(t in 1:(T + 50)) {
@@ -96,12 +96,9 @@ SimReconstruction <- function(T, type.miss, ev, eps.sd, n.rep = 1) {
       Lu[[t]] <- grid[O.t]
       Ly[[t]] <- Y0.obs[t,O.t]
     }
-
-    reconst_PACE <- ReconstPoFD::reconstructKneipLiebl(Ly, Lu,
-                                          method = 'PACE',
-                                          nRegGrid = n0)
-    X.hat.PACE <- t(matrix(unlist(reconst_PACE[['Y_reconst_list']]),
-                           ncol = T + 50))[incompletely.obs,]
+    
+    fpca <- FPCA(Ly, Lu)
+    X.hat.PACE <- fitted(fpca)[incompletely.obs,]
 
     MAE["PACE"] <- mean(apply(abs(X.hat.PACE -
                                     data_test$X0[incompletely.obs,]),1, max))
@@ -110,7 +107,7 @@ SimReconstruction <- function(T, type.miss, ev, eps.sd, n.rep = 1) {
     # Reconstruction following Kneip & Liebl ----------------------------------
     reconst_KL <- reconstructKneipLiebl(Ly, Lu,
                                         method = 'Error>0_AlignYES_CEscores',
-                                        nRegGrid = n0)
+                                        nRegGrid = N)
     X.hat.KL <- t(matrix(unlist(reconst_KL[['Y_reconst_list']]),
                          ncol = T + 50))[incompletely.obs,]
 

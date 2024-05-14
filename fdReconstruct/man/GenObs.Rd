@@ -6,7 +6,7 @@
 \usage{
 GenObs(
   T = 100,
-  n = 51,
+  N = 51,
   r = 50,
   type.miss = "A",
   ev = "exp",
@@ -17,7 +17,7 @@ GenObs(
 \arguments{
 \item{T}{Sample size (T = 100 by default).}
 
-\item{n}{Number of equispaced grid points (n = 51 by default).}
+\item{N}{Number of equispaced grid points (N = 51 by default).}
 
 \item{r}{Number of factors (r = 50 by default); must be an even number.}
 
@@ -40,7 +40,7 @@ Generate functional data
 }
 \examples{
 set.seed(123)
-data <- GenObs(T = 4, n = 51)
+data <- GenObs(T = 4, N = 51)
 par(mfrow = c(1,2))
 matplot(t(data$Y0.obs), type = "l")
 matplot(t(data$Y1.obs), type = "l")

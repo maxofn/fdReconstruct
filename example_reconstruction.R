@@ -1,6 +1,6 @@
 directory <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(directory)
-library(FDFM)
+library(fdReconstruct)
 library(fdapace)
 library(ReconstPoFD)
 require(RColorBrewer)
@@ -15,16 +15,15 @@ BLUE <- brewer.pal(3, name="Paired")[2]
 set.seed(1)
 
 T <- 100
-data_test  <- GenObs(T = 1, n = 51, r = 50, type.miss = "A", ev = "exp",
+data_test  <- GenObs(T = 1, N = 51, r = 50, type.miss = "A", ev = "exp",
                      eps.sd = 0.05, complete = FALSE)
-data_train <- GenObs(T = T, n = 51, r = 50, type.miss = "A", ev = "exp",
+data_train <- GenObs(T = T, N = 51, r = 50, type.miss = "A", ev = "exp",
                      eps.sd = 0.05, complete = TRUE)
 
 Y0.obs <- rbind(data_test$Y0.obs, data_train$Y0.obs)
 Y1.obs <- rbind(data_test$Y1.obs, data_train$Y1.obs)
 
-reconst_mult <- ReconstFD(Y0.obs, Y1.obs, T.set = c(1),
-                          pred.band = TRUE)
+reconst_mult <- fdReconstruct(Y0.obs, Y1.obs, T.set = c(1), pred.band = TRUE)
 
 grid <- seq(0, 1, length.out = 51)
 x.hat.df <- data.frame(Var1 = grid, value = as.vector(reconst_mult$X.hat))
@@ -52,17 +51,16 @@ plot.exp
 set.seed(1)
 
 T <- 100
-data_test  <- GenObs(T = 1, n = 51, r = 50, type.miss = "A", ev = "poly",
+data_test  <- GenObs(T = 1, N = 51, r = 50, type.miss = "A", ev = "poly",
                      eps.sd = 0.05, complete = FALSE)
-data_train <- GenObs(T = T, n = 51, r = 50, type.miss = "A", ev = "poly",
+data_train <- GenObs(T = T, N = 51, r = 50, type.miss = "A", ev = "poly",
                      eps.sd = 0.05, complete = TRUE)
 
 
 Y0.obs <- rbind(data_test$Y0.obs, data_train$Y0.obs)
 Y1.obs <- rbind(data_test$Y1.obs, data_train$Y1.obs)
 
-reconst_mult <- ReconstFD(Y0.obs, Y1.obs, T.set = c(1),
-                          pred.band = TRUE)
+reconst_mult <- fdReconstruct(Y0.obs, Y1.obs, T.set = c(1), pred.band = TRUE)
 
 grid <- seq(0, 1, length.out = 51)
 x.hat.df <- data.frame(Var1 = grid, value = as.vector(reconst_mult$X.hat))
@@ -86,8 +84,8 @@ plot.poly <- ggplot2::ggplot() +
   theme(legend.position="bottom")
 plot.poly
 
-pdf(paste0(getwd(), "/Res/Reconstruction/", "simulation_examples.pdf"), height = 3,
-    width = 8.27)
+pdf(paste0(getwd(), "/Results/Reconstruction/", "simulation_examples.pdf"),
+    height = 3, width = 8.27)
 do.call("ggarrange", c(list(plot.exp, plot.poly), nrow = 1, ncol = 2))
 dev.off()
 

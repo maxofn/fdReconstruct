@@ -23,8 +23,8 @@ Run 5-fold cross validation for estimating the unknown rank.
 }
 \examples{
 set.seed(123)
-data_comp <- GenObs(T = 50, n = 51, r = 4, complete = TRUE)
-data_inco <- GenObs(T = 50, n = 51, r = 4, complete = FALSE)
+data_comp <- GenObs(T = 50, N = 51, r = 4, complete = TRUE)
+data_inco <- GenObs(T = 50, N = 51, r = 4, complete = FALSE)
 Y0.obs <- rbind(data_inco$Y0.obs, data_comp$Y0.obs)
 Y1.obs <- rbind(data_inco$Y1.obs, data_comp$Y1.obs)
 RunCV(M.set = 1:10, cbind(Y0.obs, Y1.obs))

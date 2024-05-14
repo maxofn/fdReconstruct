@@ -2,13 +2,11 @@ directory <- dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(directory)
 
 library(doParallel)
-library(FDFM)
+library(fdReconstruct)
 library(foreach)
 
-set.seed(1)
-
 # Run simulation for alpha = 0.05  -----------------------------------------
-
+set.seed(1)
 alpha = 0.05
 
 predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
@@ -38,8 +36,9 @@ predres <- rbind(predres1A_exp_01, predres2A_exp_01,
                  predres1B_poly_01, predres2B_poly_01,
                  predres1B_poly_005, predres2B_poly_005)
 
-write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_095.csv"))
+write.csv(predres, file = paste0(getwd(), "/Results/Bands/pred_res_095.csv"))
 
+set.seed(1)
 alpha = 0.10
 
 predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
@@ -69,8 +68,9 @@ predres <- rbind(predres1A_exp_01, predres2A_exp_01,
                  predres1B_poly_01, predres2B_poly_01,
                  predres1B_poly_005, predres2B_poly_005)
 
-write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_090.csv"))
+write.csv(predres, file = paste0(getwd(), "/Results/Bands/pred_res_090.csv"))
 
+set.seed(1)
 alpha = 0.25
 
 predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
@@ -100,17 +100,17 @@ predres <- rbind(predres1A_exp_01, predres2A_exp_01,
                  predres1B_poly_01, predres2B_poly_01,
                  predres1B_poly_005, predres2B_poly_005)
 
-write.csv(predres, file = paste0(getwd(), "/Res/Bands/pred_res_075.csv"))
+write.csv(predres, file = paste0(getwd(), "/Results/Bands/pred_res_075.csv"))
 
 # Functions ---------------------------------------------------------------
 
 SimPredint <- function(T, alpha, type.miss, ev, eps.sd, n.rep = 1) {
   # Perform Simulation
 
-  cluster <- makeCluster(4)
+  cluster <- makeCluster(detectCores() - 1)
   registerDoParallel(cluster)
 
-  res <- foreach(rep = 1:n.rep, .combine = 'cbind', .packages = 'FDFM') %dopar% {
+  res <- foreach(rep = 1:n.rep, .combine = 'cbind', .packages = 'fdReconstruct') %dopar% {
 
     # Generate test data
     data_test <-  GenObs(T = 100, type.miss = type.miss, ev = ev,
@@ -124,8 +124,8 @@ SimPredint <- function(T, alpha, type.miss, ev, eps.sd, n.rep = 1) {
     incompletely.obs <- which(rowSums(is.na(Y0.obs)) > 0)
 
     # Reconstruction via factor models
-    reconst <- ReconstFD(Y0.obs, Y1.obs, T.set = incompletely.obs,
-                         pred.band = TRUE, p = 1 - alpha)
+    reconst <- fdReconstruct(Y0.obs, Y1.obs, T.set = incompletely.obs,
+                             pred.band = TRUE, p = 1 - alpha)
 
     coverage <- 0
     for(t in 1:length(incompletely.obs)) {

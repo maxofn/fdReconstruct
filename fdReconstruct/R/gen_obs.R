@@ -1,13 +1,13 @@
 #' Generate functional data
 #'
-#' @param T Sample size (T = 100 by default).
-#' @param n Number of equispaced grid points (n = 51 by default).
-#' @param r Number of factors (r = 50 by default); must be an even number.
+#' @param T         Sample size (T = 100 by default).
+#' @param N         Number of equispaced grid points (N = 51 by default).
+#' @param r         Number of factors (r = 50 by default); must be an even number.
 #' @param type.miss Type of missingness mechanism.
-#' @param ev Decay of eigenvalues; either "exp" (default) or polynomial else.
-#' @param eps.sd Standard deviation of measurement errors.
-#' @param complete If complete = TRUE (default), functions are completely
-#'        observable.
+#' @param ev        Decay of eigenvalues; either "exp" (default) or polynomial else.
+#' @param eps.sd    Standard deviation of measurement errors.
+#' @param complete  If complete = TRUE (default), functions are completely
+#'                  observable.
 #'
 #' @returns
 #' A list containing the true data matrices 'X0', 'X1', the noisy data
@@ -18,20 +18,20 @@
 #'
 #' @examples
 #' set.seed(123)
-#' data <- GenObs(T = 4, n = 51)
+#' data <- GenObs(T = 4, N = 51)
 #' par(mfrow = c(1,2))
 #' matplot(t(data$Y0.obs), type = "l")
 #' matplot(t(data$Y1.obs), type = "l")
 
-GenObs <- function (T = 100, n = 51, r = 50, type.miss = "A", ev = "exp",
+GenObs <- function (T = 100, N = 51, r = 50, type.miss = "A", ev = "exp",
                     eps.sd = 0.1, complete = FALSE) {
   if (r%%2 == 1) {
     stop("The parameter r must be even.")
   }
-  grid <- seq(0, 1, length.out = n)
+  grid <- seq(0, 1, length.out = N)
   mu <- sin(pi * grid)
-  mu.mat <- matrix(rep(mu, T), byrow = TRUE, nrow = T, ncol = n)
-  b.grid <- as.matrix(1:(r/2), nrow = r/2) %*% t(as.matrix(grid, nrow = n))
+  mu.mat <- matrix(rep(mu, T), byrow = TRUE, nrow = T, ncol = N)
+  b.grid <- as.matrix(1:(r/2), nrow = r/2) %*% t(as.matrix(grid, nrow = N))
   sin.grid <- sqrt(2) * sin(2 * pi * b.grid)
   cos.grid <- sqrt(2) * cos(2 * pi * b.grid)
   r.vec <- 1:(r/2)
@@ -56,7 +56,7 @@ GenObs <- function (T = 100, n = 51, r = 50, type.miss = "A", ev = "exp",
           0.5 * t(t(cos.grid[1,])) %*%  sin.grid[1,] +
           0.3 * t(t(cos.grid[1,])) %*%  cos.grid[1,]
 
-  X1 <- t(beta %*% t(X0) / n)
+  X1 <- t(beta %*% t(X0) / N)
 
   Y0 <- X0 + stats::rnorm(length(X0), sd = eps.sd)
   Y1 <- X1 + stats::rnorm(length(X1), sd = eps.sd)
@@ -67,14 +67,14 @@ GenObs <- function (T = 100, n = 51, r = 50, type.miss = "A", ev = "exp",
   if(complete == FALSE) {
     if (type.miss == "A") {
       for (t in 1:T) {
-        D <- sample(floor(1 * n/2):floor(3 * n/4), size = 1)
-        Y0.obs[t, D:n] <- NA
+        D <- sample(floor(1 * N/2):floor(3 * N/4), size = 1)
+        Y0.obs[t, D:N] <- NA
       }
     }
     if (type.miss == "B") {
       for (t in 1:T) {
-        D <- sample(floor(1 * n/4):floor(3 * n/4), size = 1)
-        Y0.obs[t, D:n] <- NA
+        D <- sample(floor(1 * N/4):floor(3 * N/4), size = 1)
+        Y0.obs[t, D:N] <- NA
       }
     }
   }

@@ -1,0 +1,13 @@
+Package: fdReconstruct
+Type: Package
+Title: Reconstruction of partially observed functional data using approximate factor models
+Version: 0.1.0
+Authors@R: person("Maximilian", "Ofner", email = "m.ofner@tugraz.at", 
+  role = c("aut", "cre"))
+Description: Companions the work 'Covariate-informed reconstruction of partially observed functional data via factor models'.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 2.10)
