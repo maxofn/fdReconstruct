@@ -9,7 +9,7 @@ Ofner, M., & Hörmann, S. (2024), "Covariate-informed reconstruction of partiall
 The R-package `fdReconstruct` can be installed and loaded via the commands
 
 ```
-devtools::install_github("maxofn/fdReconstruct")
+devtools::install_github("maxofn/fdReconstruct/fdReconstruct")
 library(fdReconstruct)
 ```
 
