@@ -1,4 +1,4 @@
-# FDFM
+# fdReconstruct
 
 This repository provides the code and data considered in the work
 
@@ -18,7 +18,7 @@ library(fdReconstruct)
 The main function for the reconstruction of functional data is `fdReconstruct`. Type
 
 ```
-help(ReconstFD)
+help(fdReconstruct)
 ```
 
 for further details. Data of the real data application are contained in `temp_graz`.
