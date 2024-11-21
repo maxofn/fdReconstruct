@@ -11,6 +11,7 @@ GenObs(
   type.miss = "A",
   ev = "exp",
   eps.sd = 0.1,
+  b = c(1.1, 0.7, 0.5, 0.3),
   complete = FALSE
 )
 }
@@ -26,6 +27,8 @@ GenObs(
 \item{ev}{Decay of eigenvalues; either "exp" (default) or polynomial else.}
 
 \item{eps.sd}{Standard deviation of measurement errors.}
+
+\item{b}{Coefficient vector for the covariate.}
 
 \item{complete}{If complete = TRUE (default), functions are completely
 observable.}

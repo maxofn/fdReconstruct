@@ -6,6 +6,7 @@
 #' @param type.miss Type of missingness mechanism.
 #' @param ev        Decay of eigenvalues; either "exp" (default) or polynomial else.
 #' @param eps.sd    Standard deviation of measurement errors.
+#' @param b         Coefficient vector for the covariate.
 #' @param complete  If complete = TRUE (default), functions are completely
 #'                  observable.
 #'
@@ -24,7 +25,7 @@
 #' matplot(t(data$Y1.obs), type = "l")
 
 GenObs <- function (T = 100, N = 51, r = 50, type.miss = "A", ev = "exp",
-                    eps.sd = 0.1, complete = FALSE) {
+                    eps.sd = 0.1, b = c(1.1, 0.7, 0.5, 0.3), complete = FALSE) {
   if (r%%2 == 1) {
     stop("The parameter r must be even.")
   }
@@ -51,10 +52,10 @@ GenObs <- function (T = 100, N = 51, r = 50, type.miss = "A", ev = "exp",
     matrix(stats::rnorm(T * r/2), nrow = T, ncol = r/2)
   X0 <- xi1 %*% sin.grid + xi2 %*% cos.grid + mu.mat
 
-  beta <- 1.1 * t(t(sin.grid[1,])) %*%  sin.grid[1,] +
-          0.7 * t(t(sin.grid[1,])) %*%  cos.grid[1,] +
-          0.5 * t(t(cos.grid[1,])) %*%  sin.grid[1,] +
-          0.3 * t(t(cos.grid[1,])) %*%  cos.grid[1,]
+  beta <- b[1] * t(t(sin.grid[1,])) %*%  sin.grid[1,] +
+          b[2] * t(t(sin.grid[1,])) %*%  cos.grid[1,] +
+          b[3] * t(t(cos.grid[1,])) %*%  sin.grid[1,] +
+          b[4] * t(t(cos.grid[1,])) %*%  cos.grid[1,]
 
   X1 <- t(beta %*% t(X0) / N)
 
@@ -75,6 +76,13 @@ GenObs <- function (T = 100, N = 51, r = 50, type.miss = "A", ev = "exp",
       for (t in 1:T) {
         D <- sample(floor(1 * N/4):floor(3 * N/4), size = 1)
         Y0.obs[t, D:N] <- NA
+      }
+    }
+    if (type.miss == "C") { # Not considered in paper.
+      for (t in 1:T) {
+        U <- sample(1:floor(N/2), size = 1)
+        M <- c(floor(N/4):(floor(N/4) + U), (N - U):N)
+        Y0.obs[t, M] <- NA
       }
     }
   }

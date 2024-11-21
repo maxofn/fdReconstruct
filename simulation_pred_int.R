@@ -5,8 +5,10 @@ library(doParallel)
 library(fdReconstruct)
 library(foreach)
 
-# Run simulation for alpha = 0.05  -----------------------------------------
 set.seed(1)
+
+# Run simulation for alpha = 0.05  -----------------------------------------
+
 alpha = 0.05
 
 predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
@@ -38,7 +40,8 @@ predres <- rbind(predres1A_exp_01, predres2A_exp_01,
 
 write.csv(predres, file = paste0(getwd(), "/Results/Bands/pred_res_095.csv"))
 
-set.seed(1)
+# Run simulation for alpha = 0.10  -----------------------------------------
+
 alpha = 0.10
 
 predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
@@ -70,7 +73,8 @@ predres <- rbind(predres1A_exp_01, predres2A_exp_01,
 
 write.csv(predres, file = paste0(getwd(), "/Results/Bands/pred_res_090.csv"))
 
-set.seed(1)
+# Run simulation for alpha = 0.25  -----------------------------------------
+
 alpha = 0.25
 
 predres1A_exp_01   <- SimPredint(T =  50, alpha = alpha, type.miss = 'A', ev =   "exp", eps.sd =   0.1, n.rep = 100)
@@ -140,7 +144,7 @@ SimPredint <- function(T, alpha, type.miss, ev, eps.sd, n.rep = 1) {
 
   stopCluster(cluster)
 
-  simres <- round(data.frame(MEAN = mean(res), SD = sd(res) * sqrt((n.rep - 1)/n.rep)), 4)
+  simres <- round(data.frame(MEAN = mean(res), SD = sd(res) * sqrt((n.rep - 1)/n.rep)), 2)
   colnames(simres) <- c("MEAN", "SD")
   rownames(simres) <- c(paste(type.miss, ev, eps.sd, T))
 
