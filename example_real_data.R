@@ -15,7 +15,7 @@ data <- temp_graz
 data$time <- as.POSIXct(data$time)
 N <- 48
 T <- dim(data)[1]/48
-Y0.obs <- matrix(data$temp_east , nrow = T, ncol = N, byrow = TRUE)
+Y0.obs <- matrix(data$temp_east, nrow = T, ncol = N, byrow = TRUE)
 Y1.obs <- matrix(data$temp_west, nrow = T, ncol = N, byrow = TRUE)
 
 # Analysis ----------------------------------------------------------------
@@ -226,8 +226,14 @@ res <- foreach(rep = 1:100, .combine = 'rbind',
   MAE["AYESCE"] <- mean(apply(abs(X.hat.KL - X0.sim[sim.incomplete,]),1, max))
   
   # Reconstruction following Elias, Jimenez & Wang (2023) -------------------
+  
+  # Use covariate information and same weights as for factor-based procedures.
+  w.hat <- c(NA, NA) 
+  w.hat[1] <- 1/mean(diag(stats::cov(Y0.sim[sim.complete,])))
+  w.hat[2] <- 1/mean(diag(stats::cov(Y1.sim[sim.complete,])))
 
-  X.hat.EJS <- reconstruct_EJS(Y0.sim, T.set = sim.incomplete)
+  X.hat.EJS <- reconstruct_EJS(cbind(sqrt(w.hat[1]) * Y0.sim, sqrt(w.hat[2]) * Y1.sim),
+                               T.set = sim.incomplete)[,1:N] / sqrt(w.hat[1])
   
   MAE["DEPTH"] <- mean(apply(abs(X.hat.EJS - X0.sim[sim.incomplete,]),1, max))
   
@@ -252,7 +258,7 @@ res <- foreach(rep = 1:100, .combine = 'rbind',
   }
   X.test <- list(X = list(Ly = Lx.test, Lt = Lt))
   
-  reconst_FLM <- FLM1(Y, X, X.test)
+  reconst_FLM <- FLM(Y, X, X.test)
   X.hat.FLM <- matrix(unlist(reconst_FLM[['yPred']]), nrow = length(sim.incomplete))
   
   MAE["FLM"] <- mean(apply(abs(X.hat.FLM - X0.sim[sim.incomplete,]),1, max))
