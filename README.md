@@ -2,7 +2,7 @@
 
 This repository provides the code and data considered in the work
 
-Maximilian Ofner, Siegfried Hörmann "Covariate-informed reconstruction of partially observed functional data via factor models," Electronic Journal of Statistics, Electron. J. Statist. 19(1), 1981-2000, (2025) 
+Ofner, M., & Hörmann, S. (2025). Covariate-informed reconstruction of partially observed functional data via factor models. Electronic Journal of Statistics, 19(1), 1981-2000.
 
 ## Installation
 
